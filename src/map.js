@@ -220,16 +220,16 @@ export function flyToSky() {
     if (!viewer) return;
 
     // Position above Shinjuku, looking up at the sky
-    const position = Cesium.Cartesian3.fromDegrees(139.6917, 35.6895, 300);
+    const position = Cesium.Cartesian3.fromDegrees(139.6917, 35.6895, 400);
 
     viewer.camera.flyTo({
         destination: position,
         orientation: {
             heading: Cesium.Math.toRadians(0),
-            pitch: Cesium.Math.toRadians(15), // Look up at sky
+            pitch: Cesium.Math.toRadians(30), // Look up at sky more
             roll: 0,
         },
-        duration: 3.0,
+        duration: 5.0, // Slower camera movement
     });
 }
 
@@ -242,8 +242,8 @@ export async function setClearSkyWeather() {
     // Start camera flying up to show sky
     flyToSky();
 
-    const duration = 3000; // 3 seconds
-    const steps = 60;
+    const duration = 6000; // 6 seconds (longer for dramatic effect)
+    const steps = 120;
     const interval = duration / steps;
 
     // Starting colors (cyberpunk)

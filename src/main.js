@@ -416,6 +416,55 @@ async function endGame() {
 
   await showStageTransition('ALL SECTORS UNLOCKED');
 
+  // Auto-collapse chat panel to show full sky view
+  dom.chatPanel.classList.add('minimized');
+  dom.chatToggle.textContent = '+';
+
+  // Show "CLEAR" overlay
+  let clearOverlay = document.getElementById('clear-overlay');
+  if (!clearOverlay) {
+    clearOverlay = document.createElement('div');
+    clearOverlay.id = 'clear-overlay';
+    clearOverlay.innerHTML = '<span>CLEAR</span>';
+    clearOverlay.style.cssText = `
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: 'Orbitron', monospace;
+      font-size: 8rem;
+      font-weight: 900;
+      color: transparent;
+      background: linear-gradient(135deg, #00ffea 0%, #ff00ff 50%, #ffff00 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      text-shadow: 0 0 60px rgba(0, 255, 234, 0.8), 0 0 120px rgba(255, 0, 255, 0.5);
+      z-index: 1000;
+      opacity: 0;
+      animation: clearFadeIn 2s ease-out 1s forwards;
+      letter-spacing: 0.3em;
+      pointer-events: none;
+    `;
+    document.body.appendChild(clearOverlay);
+
+    // Add keyframes if not exists
+    if (!document.getElementById('clear-keyframes')) {
+      const style = document.createElement('style');
+      style.id = 'clear-keyframes';
+      style.textContent = `
+        @keyframes clearFadeIn {
+          0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+          50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+          100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+  }
+  clearOverlay.style.animation = 'none';
+  clearOverlay.offsetHeight; // Trigger reflow
+  clearOverlay.style.animation = 'clearFadeIn 2s ease-out 1s forwards';
+
   // Start clearing sky animation (runs in background)
   const skyPromise = setClearSkyWeather();
 
@@ -439,6 +488,13 @@ async function endGame() {
 
   // Wait for sky to finish clearing before showing ending
   await skyPromise;
+
+  // Hide CLEAR overlay before showing ending screen
+  if (clearOverlay) {
+    clearOverlay.style.transition = 'opacity 1s';
+    clearOverlay.style.opacity = '0';
+  }
+  await new Promise(r => setTimeout(r, 1000));
 
   speak(endingStory);
   showScreen('ending');
