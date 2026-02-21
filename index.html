@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tokyo Escape -- 時空の脱出</title>
+  <meta name="description" content="3D都市データとAIが生み出す東京脱出ゲーム" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+JP:wght@300;400;700&family=Share+Tech+Mono&display=swap"
+    rel="stylesheet" />
+</head>
+
+<body>
+  <div id="app">
+    <!-- Title Screen -->
+    <div id="title-screen" class="screen active">
+      <div class="title-bg"></div>
+      <div class="title-content">
+        <div class="glitch-container">
+          <h1 class="title-text glitch" data-text="TOKYO ESCAPE">TOKYO ESCAPE</h1>
+        </div>
+        <p class="subtitle">-- 時空の脱出 --</p>
+        <p class="subtitle-desc">3Dサイバーシティ x AI が生み出す脱出パズル</p>
+        <div class="title-controls-hint">
+          <span>WASD / 矢印キー: カメラ移動</span>
+          <span>マウス: 視点回転</span>
+          <span>クリック: 建物スキャン</span>
+        </div>
+        <button id="start-btn" class="cyber-btn">
+          <span class="cyber-btn-text">JACK IN</span>
+          <span class="cyber-btn-glitch"></span>
+        </button>
+      </div>
+      <div class="scanlines"></div>
+    </div>
+
+    <!-- Boot Sequence (intro after start) -->
+    <div id="boot-screen" class="screen">
+      <div id="boot-terminal">
+        <div id="boot-lines"></div>
+        <div id="boot-cursor">_</div>
+      </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="game-screen" class="screen">
+      <!-- 3D Map -->
+      <div id="cesium-container"></div>
+
+      <!-- Floating Sky Text -->
+      <div id="sky-overlay">
+        <div class="sky-text sky-text-1">AREA: LOCKED</div>
+        <div class="sky-text sky-text-2">ESCAPE PROTOCOL ACTIVE</div>
+        <div class="sky-text sky-text-3">SIGNAL DETECTED</div>
+        <div class="sky-text sky-text-4" id="sky-location"></div>
+      </div>
+
+      <!-- HUD Overlay -->
+      <div id="hud">
+        <div id="hud-top">
+          <div id="stage-info">
+            <span id="stage-label">SECTOR</span>
+            <span id="stage-number">1</span>
+            <span id="stage-name">-- 東京タワー</span>
+          </div>
+          <div id="timer-container">
+            <span id="timer-label">ESCAPE TIME</span>
+            <span id="timer">00:00</span>
+          </div>
+          <!-- Voice Control Panel -->
+          <div id="voice-controls">
+            <button id="voice-skip-btn" title="Skip current voice">SKIP</button>
+            <button id="audio-indicator" title="VOICE ON/OFF">VOICE</button>
+          </div>
+        </div>
+
+        <!-- Stage Progress -->
+        <div id="stage-progress">
+          <div class="progress-node active" data-stage="1">1</div>
+          <div class="progress-line"></div>
+          <div class="progress-node" data-stage="2">2</div>
+          <div class="progress-line"></div>
+          <div class="progress-node" data-stage="3">3</div>
+          <div class="progress-line"></div>
+          <div class="progress-node" data-stage="4">4</div>
+          <div class="progress-line"></div>
+          <div class="progress-node" data-stage="5">5</div>
+        </div>
+      </div>
+
+      <!-- Keyboard hint -->
+      <div id="controls-hint">
+        <span>WASD: 移動</span>
+        <span>Q/E: 上昇/下降</span>
+        <span>CLICK: スキャン</span>
+      </div>
+
+      <!-- Chat Panel -->
+      <div id="chat-panel">
+        <div id="chat-header">
+          <span class="chat-title">NEURAL LINK // AI GAME MASTER</span>
+          <button id="chat-toggle" class="chat-toggle-btn">_</button>
+        </div>
+        <div id="chat-messages"></div>
+        <div id="chat-input-area">
+          <input type="text" id="chat-input" placeholder="アクセスコードを入力..." autocomplete="off" />
+          <button id="chat-send" class="cyber-btn-small">SEND</button>
+        </div>
+      </div>
+
+      <!-- Stage Transition Overlay -->
+      <div id="stage-transition" class="hidden">
+        <div class="transition-content">
+          <span class="transition-label">SECTOR CLEAR</span>
+          <span class="transition-stage"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ending Screen -->
+    <div id="ending-screen" class="screen">
+      <div class="ending-content">
+        <h1 class="ending-title glitch" data-text="ESCAPE SUCCESS">ESCAPE SUCCESS</h1>
+        <p class="ending-subtitle">脱出成功 -- SYSTEM UNLOCKED</p>
+        <div id="ending-stats">
+          <div class="stat-item">
+            <span class="stat-label">ESCAPE TIME</span>
+            <span id="final-time" class="stat-value">00:00</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">HINTS USED</span>
+            <span id="final-hints" class="stat-value">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">RANK</span>
+            <span id="final-rank" class="stat-value">--</span>
+          </div>
+        </div>
+        <button id="restart-btn" class="cyber-btn">
+          <span class="cyber-btn-text">JACK IN AGAIN</span>
+        </button>
+      </div>
+      <div class="scanlines"></div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+
+</html>
