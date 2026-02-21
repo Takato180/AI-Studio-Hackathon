@@ -7,6 +7,7 @@ let ttsEnabled = true;
 let currentAudio = null;
 let audioQueue = [];
 let isPlaying = false;
+let currentSpeakResolve = null; // For interrupting speakAndWait
 
 /**
  * Add text to the TTS queue (does NOT interrupt current playback)
@@ -28,6 +29,7 @@ export function speak(text) {
 
 /**
  * Speak text and return a Promise that resolves when done (for sequencing)
+ * Can be interrupted by calling skipAndProceed()
  */
 export function speakAndWait(text) {
     return new Promise((resolve) => {
@@ -47,10 +49,31 @@ export function speakAndWait(text) {
             return;
         }
 
+        // Store resolve for interruption
+        currentSpeakResolve = resolve;
+
         // Clear queue and stop current -- this is a priority message
         stopSpeaking();
-        synthesizeAndPlay(clean).then(resolve).catch(resolve);
+        synthesizeAndPlay(clean).then(() => {
+            currentSpeakResolve = null;
+            resolve();
+        }).catch(() => {
+            currentSpeakResolve = null;
+            resolve();
+        });
     });
+}
+
+/**
+ * Skip current speech and proceed to next step immediately
+ */
+export function skipAndProceed() {
+    stopSpeaking();
+    if (currentSpeakResolve) {
+        const resolve = currentSpeakResolve;
+        currentSpeakResolve = null;
+        resolve();
+    }
 }
 
 /**

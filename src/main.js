@@ -4,7 +4,7 @@ import { STAGES } from './stages.js';
 import { initMap, flyToLandmark, addLandmarkMarker, clearMarkers, setClearSkyWeather } from './map.js';
 import { initGameSession, generatePuzzle, evaluateAnswer, requestHint, generateNarration, generateEndingStory } from './gemini.js';
 import { setupBuildingInteraction, clearHighlights } from './buildings.js';
-import { speak, speakAndWait, stopSpeaking, toggleTTS } from './tts.js';
+import { speak, speakAndWait, stopSpeaking, skipAndProceed, toggleTTS } from './tts.js';
 
 // ----- Game State -----
 const state = {
@@ -566,9 +566,16 @@ dom.chatToggle.addEventListener('click', () => {
   dom.chatToggle.textContent = dom.chatPanel.classList.contains('minimized') ? '+' : '_';
 });
 
-// Voice skip button
+// Voice skip button - skip and proceed to next step
 document.getElementById('voice-skip-btn').addEventListener('click', () => {
-  stopSpeaking();
+  skipAndProceed();
+});
+
+// Enter key to skip voice and proceed (when not typing in chat)
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && document.activeElement !== dom.chatInput && state.gameStarted) {
+    skipAndProceed();
+  }
 });
 
 // Voice toggle
