@@ -441,7 +441,7 @@ async function endGame() {
       text-shadow: 0 0 60px rgba(0, 255, 234, 0.8), 0 0 120px rgba(255, 0, 255, 0.5);
       z-index: 1000;
       opacity: 0;
-      animation: clearFadeIn 2s ease-out 1s forwards;
+      animation: clearFadeIn 0.8s ease-out 0.3s forwards;
       letter-spacing: 0.3em;
       pointer-events: none;
     `;
@@ -463,7 +463,7 @@ async function endGame() {
   }
   clearOverlay.style.animation = 'none';
   clearOverlay.offsetHeight; // Trigger reflow
-  clearOverlay.style.animation = 'clearFadeIn 2s ease-out 1s forwards';
+  clearOverlay.style.animation = 'clearFadeIn 0.8s ease-out 0.3s forwards';
 
   // Start clearing sky animation (runs in background)
   const skyPromise = setClearSkyWeather();
