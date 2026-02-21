@@ -461,11 +461,11 @@ function calculateRank() {
 // ----- Input Handling -----
 async function onSendAnswer() {
   const answer = dom.chatInput.value.trim();
-  if (!answer || state.isProcessing) return;
+  if (!answer) return;
 
+  // Dev commands work even during processing
   if (answer === '/skip') {
     dom.chatInput.value = '';
-    // Dev command: skip everything immediately
     stopSpeaking();
     removeTypingIndicator();
     state.isProcessing = false;
@@ -476,7 +476,6 @@ async function onSendAnswer() {
 
   if (answer === '/end') {
     dom.chatInput.value = '';
-    // Dev command: jump directly to ending
     stopSpeaking();
     removeTypingIndicator();
     state.isProcessing = false;
@@ -484,6 +483,9 @@ async function onSendAnswer() {
     await endGame();
     return;
   }
+
+  // Regular input blocked during processing
+  if (state.isProcessing) return;
 
   state.isProcessing = true;
   dom.chatSend.disabled = true;

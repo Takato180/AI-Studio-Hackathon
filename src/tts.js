@@ -8,6 +8,7 @@ let currentAudio = null;
 let audioQueue = [];
 let isPlaying = false;
 let currentSpeakResolve = null; // For interrupting speakAndWait
+let synthesisAborted = false; // Prevent playing audio after stop
 
 /**
  * Add text to the TTS queue (does NOT interrupt current playback)
@@ -23,6 +24,7 @@ export function speak(text) {
         .trim();
     if (!clean || clean.length < 3) return;
 
+    synthesisAborted = false; // Allow new speech
     audioQueue.push(clean);
     if (!isPlaying) processQueue();
 }
@@ -99,6 +101,7 @@ async function processQueue() {
  */
 async function synthesizeAndPlay(text) {
     const indicator = document.getElementById('audio-indicator');
+    synthesisAborted = false;
 
     try {
         const response = await fetch(`${TTS_ENDPOINT}?key=${TTS_API_KEY}`, {
@@ -120,16 +123,25 @@ async function synthesizeAndPlay(text) {
             }),
         });
 
+        // Check if stopped during fetch
+        if (synthesisAborted) return;
+
         if (!response.ok) {
             console.warn('Cloud TTS error:', response.status);
             return;
         }
 
         const data = await response.json();
-        if (!data.audioContent) return;
+        if (!data.audioContent || synthesisAborted) return;
 
         const audioBlob = base64ToBlob(data.audioContent, 'audio/mp3');
         const audioUrl = URL.createObjectURL(audioBlob);
+
+        // Check again before playing
+        if (synthesisAborted) {
+            URL.revokeObjectURL(audioUrl);
+            return;
+        }
 
         return new Promise((resolve) => {
             currentAudio = new Audio(audioUrl);
@@ -166,6 +178,7 @@ async function synthesizeAndPlay(text) {
  * Stop all audio and clear queue
  */
 export function stopSpeaking() {
+    synthesisAborted = true; // Prevent pending fetches from playing
     audioQueue = [];
     isPlaying = false;
     if (currentAudio) {
