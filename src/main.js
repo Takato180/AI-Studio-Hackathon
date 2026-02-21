@@ -461,6 +461,10 @@ async function onSendAnswer() {
 
   if (answer === '/skip') {
     dom.chatInput.value = '';
+    // Dev command: skip everything immediately
+    stopSpeaking();
+    removeTypingIndicator();
+    state.isProcessing = false;
     addSystemMessage('DEBUG: STAGE SKIP');
     await advanceStage();
     return;
