@@ -364,7 +364,19 @@ async function loadStage(stage) {
   addTypingIndicator();
   const puzzleText = await generatePuzzle(stage);
   removeTypingIndicator();
-  addMessage(puzzleText, 'ai');
+
+  // Show puzzle text (without auto-speak from addMessage)
+  const puzzleMsg = document.createElement('div');
+  puzzleMsg.className = 'message ai';
+  puzzleMsg.innerHTML = puzzleText
+    .replace(/^\[PUZZLE\]\s*/i, '')
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n/g, '<br>');
+  dom.chatMessages.appendChild(puzzleMsg);
+  dom.chatMessages.scrollTop = dom.chatMessages.scrollHeight;
+
+  // Speak puzzle and wait for completion
+  await speakAndWait(puzzleText);
 }
 
 async function advanceStage() {
@@ -466,7 +478,19 @@ async function onSendAnswer() {
 
   if (response.startsWith('[CORRECT]') || response.includes('[CORRECT]')) {
     playSound('correct');
-    addMessage(response, 'ai');
+    // Show message but don't auto-speak (we'll use speakAndWait)
+    const msg = document.createElement('div');
+    msg.className = 'message ai';
+    msg.innerHTML = response
+      .replace(/^\[CORRECT\]\s*/i, '')
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\n/g, '<br>');
+    dom.chatMessages.appendChild(msg);
+    dom.chatMessages.scrollTop = dom.chatMessages.scrollHeight;
+
+    // Wait for response to be fully spoken before advancing
+    await speakAndWait(response);
+
     addSystemMessage('ACCESS GRANTED -- SECTOR UNLOCKED');
     state.isProcessing = false;
     dom.chatSend.disabled = false;
