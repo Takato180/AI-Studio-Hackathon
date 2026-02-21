@@ -3,26 +3,40 @@
  * GeoAI Game Master SDK
  * ========================================
  *
- * A powerful SDK for building AI-powered location-based games
- * using Google's Gemini API and PLATEAU 3D city data.
+ * AI-powered location-based game engine using Gemini API + PLATEAU 3D city data.
  *
- * Features:
- * - Dynamic puzzle generation based on real city data
- * - Hybrid AI architecture (Cloud + Edge via Gemini Nano)
- * - Adaptive difficulty system
- * - Player-responsive narrative generation
- * - Multi-stage game flow management
+ * ## Current Implementation (v1.0)
+ * - Cloud AI: Gemini 3 Flash for puzzle generation, answer evaluation, narration
+ * - Dynamic difficulty: Adjusts based on consecutive correct/wrong answers
+ * - Flexible answer matching: AI judges variations (東京タワー/Tokyo Tower/とうきょうタワー)
+ * - Fallback puzzles: Pre-written puzzles when API fails
+ *
+ * ## Hybrid AI Architecture (Experimental)
+ * - Edge AI: Chrome's window.ai (Gemini Nano) for zero-latency evaluation
+ * - Status: Experimental feature in Chrome Canary/Dev only (requires flags)
+ * - Current behavior: Gracefully falls back to Cloud API when unavailable
+ * - Future: When widely available, enables offline play and instant responses
+ *
+ * ## Extensibility
+ * - Add stages: Just add entries to stages.js with puzzleContext data
+ * - Custom themes: Pass theme config ('cyberpunk', 'fantasy', 'mystery')
+ * - Multi-language: Set language option ('ja', 'en')
+ * - Story branching: Use generateNarration() with player stats for dynamic story
+ * - Custom AI personality: Override systemPrompt via customSystemPrompt config
+ *
+ * ## Future Possibilities
+ * - Multiplayer: Share game state, competitive puzzle solving
+ * - More cities: Osaka, Kyoto, NYC (any PLATEAU/3D Tiles compatible data)
+ * - Voice interaction: Combine with Web Speech API for voice answers
+ * - AR mode: Overlay puzzles on real camera feed
+ * - Procedural stages: AI generates new stages from city data
  *
  * @example
- * // Basic usage
- * import { GeoAIGameMaster } from './gemini.js';
- *
  * const engine = new GeoAIGameMaster({
  *   apiKey: 'YOUR_GEMINI_API_KEY',
  *   theme: 'cyberpunk',
  *   language: 'ja'
  * });
- *
  * await engine.init();
  * const puzzle = await engine.generatePuzzle(stageData);
  * const result = await engine.evaluateAnswer(userAnswer);
@@ -96,7 +110,10 @@ export class GeoAIGameMaster {
             });
         }
 
-        // Initialize Chrome's built-in AI (Gemini Nano) for hybrid fast-processing
+        // [EXPERIMENTAL] Chrome's built-in AI (Gemini Nano) for edge processing
+        // Currently only available in Chrome Canary/Dev with flags enabled
+        // When available: Zero-latency local evaluation, offline capability
+        // When unavailable: Gracefully skipped, Cloud API handles everything
         if (this.hybridMode && window.ai && window.ai.languageModel) {
             try {
                 const capabilities = await window.ai.languageModel.capabilities();
@@ -144,6 +161,17 @@ export class GeoAIGameMaster {
         }
     }
 
+    /**
+     * Dynamic difficulty adjustment based on player performance
+     *
+     * Current branching:
+     * - 3+ consecutive wrong → Very easy (direct hints)
+     * - 2 consecutive wrong  → Easier
+     * - 3+ consecutive right → Hard (multi-step reasoning)
+     * - Otherwise           → Normal
+     *
+     * Extensible: Add time-based, hint-based, or stage-specific modifiers
+     */
     _getDifficultyModifier() {
         if (this.consecutiveWrong >= 3) return '(難易度調整: プレイヤーが苦戦中。直接的なヒントを含む非常に簡単なパズルにしてください)';
         if (this.consecutiveWrong >= 2) return '(難易度調整: やや易しめに)';
@@ -265,6 +293,13 @@ export class GeoAIGameMaster {
 
     /**
      * Generate dynamic narrative between stages based on player performance
+     *
+     * Story branching based on:
+     * - Performance: Praise for streaks, taunts for struggles
+     * - Hint usage: Commentary on player's independence
+     * - Stage context: Location-specific flavor text
+     *
+     * Extensible: Add multiple endings, character interactions, side quests
      */
     async generateNarration(fromStage, toStage, playerStats = {}) {
         if (!this.chatSession) await this.init();
@@ -306,6 +341,11 @@ export class GeoAIGameMaster {
         }
     }
 
+    /**
+     * Fallback puzzles when AI generation fails
+     * These are pre-written puzzles for each stage as backup
+     * Extensible: Add more stages by adding entries with matching stage.id
+     */
     _getFallbackPuzzle(stage) {
         const fallbacks = {
             1: '[PUZZLE] [BABEL-01 認証プロトコル] このジャミングタワーの全高は333m。旧世紀、この構造物は何と呼ばれていた？正式名称をデータベースから検索せよ。',
