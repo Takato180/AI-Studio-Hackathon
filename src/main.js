@@ -470,6 +470,17 @@ async function onSendAnswer() {
     return;
   }
 
+  if (answer === '/end') {
+    dom.chatInput.value = '';
+    // Dev command: jump directly to ending
+    stopSpeaking();
+    removeTypingIndicator();
+    state.isProcessing = false;
+    addSystemMessage('DEBUG: JUMP TO ENDING');
+    await endGame();
+    return;
+  }
+
   state.isProcessing = true;
   dom.chatSend.disabled = true;
   dom.chatInput.value = '';

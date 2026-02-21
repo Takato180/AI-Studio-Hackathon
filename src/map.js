@@ -214,10 +214,33 @@ export function clearMarkers() {
 }
 
 /**
+ * Fly camera to look up at the sky (for ending scene)
+ */
+export function flyToSky() {
+    if (!viewer) return;
+
+    // Position above Shinjuku, looking up at the sky
+    const position = Cesium.Cartesian3.fromDegrees(139.6917, 35.6895, 300);
+
+    viewer.camera.flyTo({
+        destination: position,
+        orientation: {
+            heading: Cesium.Math.toRadians(0),
+            pitch: Cesium.Math.toRadians(15), // Look up at sky
+            roll: 0,
+        },
+        duration: 3.0,
+    });
+}
+
+/**
  * Gradually change weather to clear sky for ending (animation over 3 seconds)
  */
 export async function setClearSkyWeather() {
     if (!viewer) return;
+
+    // Start camera flying up to show sky
+    flyToSky();
 
     const duration = 3000; // 3 seconds
     const steps = 60;
